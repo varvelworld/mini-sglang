@@ -15,15 +15,17 @@
 
 ---
 
+### 2. abort_req O(1) 字典查找
+- **文件**: `python/minisgl/scheduler/decode.py`
+- **内容**: 把 `DecodeManager.running_reqs` 从 `Set[Req]` 改成 `Dict[int, Req]`（uid → Req），`abort_req` 从 O(n) 线性扫描变为 O(1) `dict.pop`；同步更新 `filter_reqs`、`remove_req`、`inflight_tokens`、`schedule_next_batch`
+- **分支**: `main`
+- **测试**: `tests/scheduler/test_abort_req.py`（11 个用例，覆盖 hit/miss/empty/idempotent/filter/inflight/batch）
+
+---
+
 ## 备选学习点
 
 ### 简单（和 batch tokenization 类似难度）
-
-#### A. abort_req O(1) 字典查找
-- **文件**: `python/minisgl/scheduler/decode.py:20`
-- **现状**: `abort_req` 对 `running_reqs` 做线性扫描找请求（O(n)）
-- **目标**: 在调度器里维护一个 `uid -> Req` 的字典，abort 时直接 O(1) 查找
-- **学习收获**: 理解调度器的请求生命周期（add / running / abort / finish）
 
 #### B. 补全 API sampling 参数传递
 - **文件**: `python/minisgl/server/api_server.py:265, 298`
